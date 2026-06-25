@@ -34,7 +34,7 @@ These instructions apply to the whole Terraform EKS Auto Mode module.
 - Do not create managed node groups, self-managed nodes, Karpenter resources, Kubernetes providers, Helm releases, or in-cluster resources in this module.
 - Default to EKS access entries by using API authentication.
 - Preserve control-plane log retention when cluster logging is enabled.
-- Treat `public_access_cidrs = ["0.0.0.0/0"]` as acceptable only for simple examples; call out that production callers should restrict it.
+- Keep the Kubernetes API endpoint private by default. Only enable public endpoint access explicitly, and prefer narrow `public_access_cidrs`.
 
 ## Examples And Docs
 

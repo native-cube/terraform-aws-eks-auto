@@ -27,12 +27,6 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "public_access_cidrs" {
-  description = "CIDR blocks that can reach the public Kubernetes API endpoint."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
 variable "identity_center_instance_arn" {
   description = "IAM Identity Center instance ARN used for Argo CD authentication."
   type        = string

@@ -66,10 +66,14 @@ run "capabilities_cluster_shape" {
         iam_policy_arns = [
           "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
         ]
+        iam_policy_presets = [
+          "secrets_read_only"
+        ]
       }
 
       ack = {
-        type = "ACK"
+        type               = "ACK"
+        iam_policy_presets = ["resource_tagging"]
       }
 
       kro = {
@@ -123,6 +127,16 @@ run "capabilities_cluster_shape" {
   assert {
     condition     = contains(keys(aws_iam_role_policy_attachment.eks_capability), "argocd:arn:aws:iam::aws:policy/SecretsManagerReadWrite")
     error_message = "Configured capability managed policies should be attached to the created IAM role."
+  }
+
+  assert {
+    condition     = contains(keys(aws_iam_role_policy.eks_capability_preset), "argocd:secrets_read_only")
+    error_message = "Configured capability IAM policy presets should create inline IAM policies."
+  }
+
+  assert {
+    condition     = contains(keys(aws_iam_role_policy.eks_capability_preset), "ack:resource_tagging")
+    error_message = "ACK capability IAM policy presets should create inline IAM policies."
   }
 
   assert {

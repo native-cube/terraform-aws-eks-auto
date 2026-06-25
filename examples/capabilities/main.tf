@@ -22,8 +22,7 @@ module "eks_auto" {
   subnet_ids         = var.subnet_ids
 
   endpoint_private_access = true
-  endpoint_public_access  = true
-  public_access_cidrs     = var.public_access_cidrs
+  endpoint_public_access  = false
 
   access_config = {
     authentication_mode                         = "API"
@@ -43,6 +42,7 @@ module "eks_auto" {
 
       create_iam_role    = true
       iam_policy_arns    = var.argocd_capability_iam_policy_arns
+      iam_policy_presets = ["secrets_read_only"]
       inline_policy_json = var.argocd_capability_inline_policy_json
 
       argocd = {
@@ -60,6 +60,7 @@ module "eks_auto" {
 
       create_iam_role    = true
       iam_policy_arns    = var.ack_capability_iam_policy_arns
+      iam_policy_presets = ["resource_tagging"]
       inline_policy_json = var.ack_capability_inline_policy_json
     }
 
@@ -69,6 +70,7 @@ module "eks_auto" {
 
       create_iam_role    = true
       iam_policy_arns    = var.kro_capability_iam_policy_arns
+      iam_policy_presets = ["cloudcontrol_read_only", "resource_tagging"]
       inline_policy_json = var.kro_capability_inline_policy_json
     }
   }

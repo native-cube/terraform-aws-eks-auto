@@ -11,4 +11,4 @@ module "eks_auto" {
 }
 ```
 
-Production callers should restrict API endpoint CIDRs and use private subnets with outbound egress.
+The module defaults to a private Kubernetes API endpoint. Enable `endpoint_public_access` only when callers outside the VPC need API access.

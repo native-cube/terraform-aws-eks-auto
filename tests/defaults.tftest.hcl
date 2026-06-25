@@ -52,6 +52,11 @@ run "default_auto_mode_cluster_shape" {
   }
 
   assert {
+    condition     = aws_eks_cluster.this.vpc_config[0].endpoint_public_access == false
+    error_message = "The public Kubernetes API endpoint should be disabled by default."
+  }
+
+  assert {
     condition     = aws_eks_cluster.this.compute_config[0].enabled == true
     error_message = "EKS Auto Mode compute should be enabled by default."
   }
