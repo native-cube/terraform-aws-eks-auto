@@ -188,6 +188,54 @@ run "rejects_argocd_capability_without_identity_center_instance" {
   ]
 }
 
+run "rejects_duplicate_capability_types" {
+  command = plan
+
+  variables {
+    name = "unit-invalid-duplicate-capabilities"
+    subnet_ids = [
+      "subnet-0123456789abcdef0",
+      "subnet-0fedcba9876543210"
+    ]
+
+    capabilities = {
+      ack_one = {
+        type = "ACK"
+      }
+      ack_two = {
+        type = "ACK"
+      }
+    }
+  }
+
+  expect_failures = [
+    var.capabilities
+  ]
+}
+
+run "rejects_invalid_capability_iam_policy_preset" {
+  command = plan
+
+  variables {
+    name = "unit-invalid-capability-preset"
+    subnet_ids = [
+      "subnet-0123456789abcdef0",
+      "subnet-0fedcba9876543210"
+    ]
+
+    capabilities = {
+      ack = {
+        type               = "ACK"
+        iam_policy_presets = ["admin_everything"]
+      }
+    }
+  }
+
+  expect_failures = [
+    var.capabilities
+  ]
+}
+
 run "rejects_argocd_config_for_non_argocd_capability" {
   command = plan
 

@@ -10,7 +10,7 @@ resource "aws_eks_cluster" "this" {
   vpc_config {
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
-    public_access_cidrs     = var.public_access_cidrs
+    public_access_cidrs     = local.public_access_cidrs
     security_group_ids      = var.cluster_security_group_ids
     subnet_ids              = var.subnet_ids
   }
@@ -106,6 +106,55 @@ resource "aws_eks_access_policy_association" "this" {
   ]
 }
 
+resource "aws_eks_access_entry" "auto_mode_node_class" {
+  for_each = local.auto_mode_node_class_access_entries
+
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = each.value.principal_arn
+  tags          = local.common_tags
+  type          = "EC2"
+
+  lifecycle {
+    precondition {
+      condition     = each.value.principal_arn != null
+      error_message = "Custom Auto Mode NodeClass access entries require auto_mode_node_classes[*].node_role_arn or an enabled compute_config node role."
+    }
+  }
+}
+
+resource "aws_eks_access_policy_association" "auto_mode_node_class" {
+  for_each = local.auto_mode_node_class_access_entries
+
+  cluster_name  = aws_eks_cluster.this.name
+  policy_arn    = "arn:${data.aws_partition.current.partition}:eks::aws:cluster-access-policy/AmazonEKSAutoNodePolicy"
+  principal_arn = each.value.principal_arn
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [
+    aws_eks_access_entry.auto_mode_node_class
+  ]
+}
+
+resource "aws_eks_pod_identity_association" "this" {
+  for_each = local.pod_identity_association_configs
+
+  cluster_name         = aws_eks_cluster.this.name
+  disable_session_tags = each.value.disable_session_tags
+  namespace            = each.value.namespace
+  role_arn             = local.pod_identity_iam_role_arns[each.key]
+  service_account      = each.value.service_account
+  tags                 = merge(local.common_tags, each.value.tags)
+  target_role_arn      = each.value.target_role_arn
+
+  depends_on = [
+    aws_iam_role_policy.pod_identity,
+    aws_iam_role_policy_attachment.pod_identity
+  ]
+}
+
 resource "aws_eks_capability" "this" {
   for_each = local.eks_capability_configs
 
@@ -158,6 +207,7 @@ resource "aws_eks_capability" "this" {
 
   depends_on = [
     aws_iam_role_policy.eks_capability,
+    aws_iam_role_policy.eks_capability_preset,
     aws_iam_role_policy_attachment.eks_capability
   ]
 }

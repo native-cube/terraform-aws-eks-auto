@@ -41,3 +41,19 @@ data "aws_iam_policy_document" "capability_assume_role" {
     ]
   }
 }
+
+data "aws_iam_policy_document" "pod_identity_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
